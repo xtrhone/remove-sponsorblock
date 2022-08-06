@@ -102,14 +102,14 @@ build_apk() {
 		-o $output_apk_name \
 		-b $patches_filename \
 		-m $integrations_filename
-		-e sponsorblock"
+		-e sponsorblock""
     if [ "$1" ] && [ ! "$additional_args" = "" ]; then
-        # root with $additional_args
+        # with $additional_args and required arg
         $base_cmd \
             $additional_args \
             $1
     elif [ "$1" ] && [ "$additional_args" = "" ]; then
-        # root
+        # with required arg
         $base_cmd \
             $1
     elif [ ! "$1" ] && [ ! "$additional_args" = "" ]; then
@@ -125,13 +125,15 @@ build_apk() {
 patch() {
     printf '%b\n' "${BLUE}patching process started(${RED}$root_text${BLUE})${NC}"
     printf '%b\n' "${BLUE}it may take a while please be patient${NC}"
-    if [ $nonroot = 1 ]; then
+    if [ $nonroot = 1 ] && [ "$what_to_patch" = "reddit" ]; then
+        reddit_arg="-r"
+        build_apk "$reddit_arg"
+    elif [ $nonroot = 1 ]; then
         build_apk
     else
-        root_args=" \
-		 -d $device_id \
-		 -e microg-support \
-		 --mount"
+        root_args="-d $device_id \
+          -e microg-support \
+          --mount"
         build_apk "$root_args"
     fi
 }
@@ -159,9 +161,17 @@ main() {
         apk_filename=YouTube-$apk_version.apk
         output_apk_name=revanced-$apk_version-$root_text.apk
     elif [ "$what_to_patch" = "youtube-music" ]; then
-        [ -z "$apk_version" ] && apk_version=5.14.53
+        [ -z "$apk_version" ] && apk_version=5.16.51
         apk_filename=YouTube-Music-$apk_version.apk
-        output_apk_name=revanced-music-$apk_version-$root_text.apk
+        output_apk_name=revanced-music-$apk_version-$root_text.apk 
+    elif [ "$what_to_patch" = "twitter" ]; then
+        [ -z "$apk_version" ] && apk_version=9.52.0
+        apk_filename=Twitter-$apk_version.apk
+        output_apk_name=revanced-twitter-$apk_version-$root_text.apk
+    elif [ "$what_to_patch" = "reddit" ]; then
+        [ -z "$apk_version" ] && apk_version=2022.28.0
+        apk_filename=Reddit-$apk_version.apk
+        output_apk_name=revanced-reddit-$apk_version-$root_text.apk
     fi
 
     ## link to download $what_to_patch
